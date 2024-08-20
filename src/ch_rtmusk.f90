@@ -218,14 +218,14 @@
       
       !! compute water balance - precip, evap and seep
       !! km * m * 1000 m/km * ha/10000 m2 = ha
-      ch_wat_d(ich)%area_ha = sd_ch(ich)%chl * sd_ch(ich)%chw / 10.
+      ch_wat_d(jrch)%area_ha = sd_ch(jrch)%chl * (sd_ch(jrch)%chw + 2. * sd_ch(jrch)%chd * sd_ch(jrch)%chss) / 10.
       !! m3 = 10. * mm * ha
-      ch_wat_d(ich)%precip = 10. * wst(iwst)%weat%precip * ch_wat_d(ich)%area_ha
-      ch_wat_d(ich)%evap = 10. * bsn_prm%evrch * wst(iwst)%weat%pet * ch_wat_d(ich)%area_ha
-      ch_wat_d(ich)%seep = 10. * sd_ch(ich)%chk * ch_wat_d(ich)%area_ha      !k units to mm/d
+      ch_wat_d(jrch)%precip = 10. * wst(iwst)%weat%precip * ch_wat_d(jrch)%area_ha
+      ch_wat_d(jrch)%evap = 10. * bsn_prm%evrch * wst(iwst)%weat%pet * ch_wat_d(jrch)%area_ha
+      ch_wat_d(jrch)%seep = 10. * sd_ch(jrch)%chk * ch_wat_d(jrch)%area_ha      !k units to mm/d
       
       !! add precip
-      ht2%flo = ht2%flo + ch_wat_d(ich)%precip
+      ht2%flo = ht2%flo + ch_wat_d(jrch)%precip
       
       !! calculate transmission losses
       if (ht2%flo > 1.e-6) then
@@ -249,7 +249,7 @@
         if (dep_flo <= sd_ch(jrch)%chd) then
           topw = ch_rcurv(jrch)%out2%surf_area
         else
-          topw = 1000. * sd_ch(jrch)%chl * sd_ch(jrch)%chw
+          topw = 1000. * sd_ch(jrch)%chl * (sd_ch(jrch)%chw + 2. * sd_ch(jrch)%chd * sd_ch(jrch)%chss)
         end if
         iwst = ob(icmd)%wst
         !! mm/day * m2 / (1000. * sd_ch(jrch)%msk%nsteps)

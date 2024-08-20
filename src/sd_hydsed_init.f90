@@ -127,14 +127,8 @@
         d = 0.
         chside = sd_ch(i)%chss
         fps = 4.
-        b = sd_ch(i)%chw - 2. * sd_ch(i)%chd * chside
-
-        !! check IF bottom width (b) is < 0
-        if (b <= 0.) then
-            b = .5 * sd_ch(i)%chw
-            b = Max(0., b)
-            chside = (sd_ch(i)%chw - b) / (2. * sd_ch(i)%chd)
-        end if
+        b = sd_ch(i)%chw
+		
         sd_ch_vel(i)%wid_btm = b
         sd_ch_vel(i)%dep_bf = sd_ch(i)%chd  !delete sd_ch_vel when finished
         !! compute travel time coefficients - delete when finished with flood plain

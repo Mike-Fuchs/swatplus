@@ -23,13 +23,7 @@
       real :: vel                   !               |
       real :: frac_abov
 
-      b = sd_ch(i)%chw - 2. * sd_ch(i)%chd * sd_ch(i)%chss
-      !! check if bottom width (b) is < 0
-      if (b <= 0.) then
-        b = .5 * sd_ch(i)%chw
-        b = Max(0., b)
-        sd_ch(i)%chss = (sd_ch(i)%chw - b) / (2. * sd_ch(i)%chd)
-      end if
+      b = sd_ch(i)%chw
       
       !! compute rating curve at 0.1 and 1.0 times bankfull depth
       do i_dep = 1, 2
@@ -76,7 +70,7 @@
         ch_rcurv(i)%elev(ifp_dep)%dep = (1. + frac_abov) * sd_ch(i)%chd
         ch_rcurv(i)%elev(ifp_dep)%wet_perim = p
         ch_rcurv(i)%elev(ifp_dep)%xsec_area = a
-        ch_rcurv(i)%elev(ifp_dep)%top_wid = sd_ch(i)%chw + 2. * dep / sd_ch(i)%fps
+        ch_rcurv(i)%elev(ifp_dep)%top_wid = ch_rcurv(i)%elev(2)%top_wid + 2. * dep / sd_ch(i)%fps
         ch_rcurv(i)%elev(ifp_dep)%surf_area = ch_rcurv(i)%elev(ifp_dep)%top_wid * sd_ch(i)%chl
         ch_rcurv(i)%elev(ifp_dep)%vol_ch = vol_bf
         ch_rcurv(i)%elev(ifp_dep)%vol_fp = ch_rcurv(i)%elev(ifp_dep)%top_wid * dep * sd_ch(i)%chl * 1000.

@@ -554,7 +554,7 @@
       flo_ls = ht2%flo
       !! compute water balance - precip, evap and seep
       !! km * m * 1000 m/km * ha/10000 m2 = ha
-      ch_wat_d(ich)%area_ha = sd_ch(ich)%chl * sd_ch(ich)%chw / 10.
+      ch_wat_d(ich)%area_ha = sd_ch(ich)%chl * (sd_ch(ich)%chw + 2. * sd_ch(ich)%chd * sd_ch(ich)%chss) / 10.
       !! m3 = 10. * mm * ha
       ch_wat_d(ich)%precip = 10. * wst(iwst)%weat%precip * ch_wat_d(ich)%area_ha
       ch_wat_d(ich)%evap = 10. * bsn_prm%evrch * wst(iwst)%weat%pet * ch_wat_d(ich)%area_ha
