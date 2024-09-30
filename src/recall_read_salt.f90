@@ -39,7 +39,7 @@
 
       !read all recall files
       inquire (file="salt_recall.rec", exist=i_exist)
-      if (i_exist .or. "salt_recall.rec" /= "null") then
+      if (i_exist) then
       do
         open (107,file="salt_recall.rec")
         read (107,*,iostat=eof) titldum

@@ -126,7 +126,7 @@
 
         !! calculate mass of pesticide in reach
         chpstmass = pstin + ch_water(jrch)%pest(ipest)
-      
+        
         !! calculate mass of pesticide in bed sediment
         sedpstmass = ch_benthic(jrch)%pest(ipest)
 
