@@ -1,5 +1,5 @@
       !read point source data for constituents !rtb cs
-      subroutine recall_read_cs
+      subroutine recall_read_pest
 
       use hydrograph_module
       use input_file_module
@@ -41,6 +41,7 @@
 	  !read all rec_pest files
 	  inquire (file="pest_reacll.rec", exist=i_exist)
 	  if (i_exist ) then
+	  do
 	  open (107,file="pest_recall.rec")
 	  read (107,*,iostat=eof) titldum
 	  if (eof < 0) exit
@@ -76,7 +77,7 @@
 		  allocate (rec_pest(ii)%hd_pest(366,nbyr))
 		  do pr = 1, 366
 		    do pc = 1, nbyr
-			  allocate (rec_pest(ii)%hd_pest(pr,pc)%pest(cs_db%num_pests)
+			  allocate (rec_pest(ii)%hd_pest(pr,pc)%pest(cs_db%num_pests))
 			end do
 		  end do
 		  
@@ -84,7 +85,7 @@
 		  allocate (rec_pest(ii)%hd_pest(12,nbyr))
 		  do pr = 1, 12
 		    do pc = 1, nbyr
-			  allocate (rec_pest(ii)%hd_pest(pr,pc)%pest(cs_db%num_pests)
+			  allocate (rec_pest(ii)%hd_pest(pr,pc)%pest(cs_db%num_pests))
 			end do
 		  end do
 		  
@@ -92,9 +93,10 @@
 		  allocate (rec_pest(ii)%hd_pest(1,nbyr))
 		  do pr = 1, 1
 		    do pc = 1, nbyr
-			  allocate (rec_pest(ii)%hd_pest(pr,pc)%pest(cs_db%num_pests)
+			  allocate (rec_pest(ii)%hd_pest(pr,pc)%pest(cs_db%num_pests))
 			end do
 		  end do
+		 
 	  end select
 		  
 		  
@@ -135,6 +137,7 @@
 	  close (108)
 	  end do 
 	  close (107)
+	  end do
 	  end if    
 	  
 	  
@@ -349,4 +352,4 @@
 !      endif
       
       return
-      end subroutine recall_read_cs
+      end subroutine recall_read_pest
