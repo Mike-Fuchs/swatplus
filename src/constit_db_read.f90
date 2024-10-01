@@ -35,33 +35,33 @@
         if (eof < 0) exit
         read (106,*,iostat=eof) cs_db%num_pests
         if (eof < 0) exit
-        allocate (cs_db%pests(0:cs_db%num_pests))
-        allocate (cs_db%pest_num(0:cs_db%num_pests))
+        allocate (cs_db%pests(1:cs_db%num_pests))
+        allocate (cs_db%pest_num(1:cs_db%num_pests))
         read (106,*,iostat=eof) (cs_db%pests(i), i = 1, cs_db%num_pests)
         if (eof < 0) exit
         read (106,*,iostat=eof) cs_db%num_paths
         if (eof < 0) exit
         allocate (cs_db%paths(cs_db%num_paths))
-        allocate (cs_db%path_num(0:cs_db%num_paths))
+        allocate (cs_db%path_num(1:cs_db%num_paths))
         read (106,*,iostat=eof) (cs_db%paths(i), i = 1, cs_db%num_paths)
         if (eof < 0) exit
         read (106,*,iostat=eof) cs_db%num_metals
         if (eof < 0) exit
         allocate (cs_db%metals(cs_db%num_metals))
-        allocate (cs_db%metals_num(0:cs_db%num_metals))
+        allocate (cs_db%metals_num(1:cs_db%num_metals))
         read (106,*,iostat=eof) (cs_db%metals(i), i = 1, cs_db%num_metals)
         if (eof < 0) exit
         !salt ions
         read (106,*,iostat=eof) cs_db%num_salts
         if (eof < 0) exit
         allocate (cs_db%salts(cs_db%num_salts))
-        allocate (cs_db%salts_num(0:cs_db%num_salts))
+        allocate (cs_db%salts_num(1:cs_db%num_salts))
         read (106,*,iostat=eof) (cs_db%salts(i), i = 1, cs_db%num_salts)
         !other constituents
         read (106,*,iostat=eof) cs_db%num_cs
         if (eof < 0) exit
         allocate (cs_db%cs(cs_db%num_cs))
-        allocate (cs_db%cs_num (0:cs_db%num_cs))
+        allocate (cs_db%cs_num (1:cs_db%num_cs))
         read (106,*,iostat=eof) (cs_db%cs(i), i = 1, cs_db%num_cs)
         exit
       end do
