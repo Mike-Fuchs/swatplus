@@ -327,6 +327,7 @@
 
               if(cs_db%num_salts > 0) call recall_salt(irec) !rtb salt
               if(cs_db%num_cs > 0) call recall_cs(irec) !rtb cs
+              if(cs_db%num_pests > 0) call recall_pest(irec) !rtb cs
               
           !case ("exco")   ! export coefficient hyds are set at start
 

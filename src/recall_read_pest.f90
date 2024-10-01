@@ -61,6 +61,24 @@
 	  
 	  if (imax > 0) then
 	  allocate (rec_pest(0:imax))
+	  !point sources originating from outside the watershed
+        if (.not. allocated(recoutcsb_d)) allocate (recoutcsb_d(imax))
+        if (.not. allocated(recoutcsb_m)) allocate (recoutcsb_m(imax))
+        if (.not. allocated(recoutcsb_y)) allocate (recoutcsb_y(imax))
+        if (.not. allocated(recoutcsb_a)) allocate (recoutcsb_a(imax))
+        do ii=1,imax
+          allocate (recoutcsb_d(ii)%pest(cs_db%num_pests))
+          allocate (recoutcsb_m(ii)%pest(cs_db%num_pests))
+          allocate (recoutcsb_y(ii)%pest(cs_db%num_pests))
+          allocate (recoutcsb_a(ii)%pest(cs_db%num_pests))
+          do ipest=1,cs_db%num_pests
+            recoutcsb_d(ii)%pest(ipest) = 0.
+            recoutcsb_m(ii)%pest(ipest) = 0.
+            recoutcsb_y(ii)%pest(ipest) = 0.
+            recoutcsb_a(ii)%pest(ipest) = 0.
+          enddo
+        enddo
+	  
 	  rewind (107)
 	  read (107,*,iostat=eof) titldum
 	  read (107,*,iostat=eof) header
@@ -128,9 +146,5 @@
 	  end if    
 	  end if
 	  
-write (*,*) rec_pest(10)%hd_pest(100,1)%pest(1)   
-write (*,*) rec_pest(15)%hd_pest(100,1)%pest(2)   
-
-      
       return
       end subroutine recall_read_pest

@@ -235,7 +235,7 @@
          character (len=16) :: name
          integer :: num = 0                    !number of elements
          integer :: typ                        !recall type - 1=day, 2=mon, 3=year
-         character(len=13) :: filename         !filename
+         character(len=20) :: filename         !filename
          !hyd_output units are in cms and mg/L
          type (constituent_mass), dimension (:,:), allocatable :: hd_pest
       end type recall_pesticide_inputs
