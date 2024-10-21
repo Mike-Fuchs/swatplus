@@ -104,6 +104,11 @@
       real :: pest_init         !mg            |amount of pesticide before decay
       real :: pest_end          !mg            |amount of pesticide after decay
       real :: rto_out           !none          |ratio of outflow to sum of outflow and storage
+	  real :: rto_end
+	  real :: pest_in_end
+	  real :: pest_stor_end
+	  real :: c_in
+      real :: c_stor
 
       !! zero outputs
       chpst_d(jrch) = chpstz
@@ -205,7 +210,8 @@
           chpstmass = chpstmass + chpst%pest(ipest)%resus
 
           !! calculate diffusion of pesticide between reach and sediment
-          chpst%pest(ipest)%difus = sd_ch(jrch)%aq_mix(ipest) * (fd2 * sedpstmass - frsol * chpstmass) * tday / depth
+		  chpst%pest(ipest)%difus = 0.
+          !chpst%pest(ipest)%difus = sd_ch(jrch)%aq_mix(ipest) * (fd2 * sedpstmass - frsol * chpstmass) * tday / depth
           if (chpst%pest(ipest)%difus > 0.) then
             if (chpst%pest(ipest)%difus > sedpstmass) then
               chpst%pest(ipest)%difus = sedpstmass
@@ -272,12 +278,41 @@
         end if
         ch_benthic(jrch)%pest(ipest) = sedpstmass
 
-        !! calculate outflow and storage in water column
-        rto_out = ht2%flo / (1.e-6 + ht2%flo + ch_stor(jrch)%flo)
-        rto_out = Min (1., rto_out)
-        hcs2%pest(ipest) = rto_out * chpstmass
-        ch_water(jrch)%pest(ipest) = (1. - rto_out) * chpstmass
+        !! check incomming and stored concentration        
+        c_in = pstin / wtrin
+        c_stor = ch_water(jrch)%pest(ipest) / ch_stor(jrch)%flo
         
+        if (c_in >= c_stor) then
+          !! calculate outflow and storage in water column
+          rto_out = ht2%flo / (1.e-6 + ht2%flo + ch_stor(jrch)%flo)
+          rto_out = Min (1., rto_out)
+          hcs2%pest(ipest) = rto_out * chpstmass
+          ch_water(jrch)%pest(ipest) = (1. - rto_out) * chpstmass
+        else
+          !! calculate ratio of initial pesticide available at end of timestep
+		  rto_end = chpstmass / (pstin + ch_water(jrch)%pest(ipest))
+		  rto_end = max(0.,min(1.,rto_end))
+		
+		  !! calculate pesticide incomming and stored at the end of the timestep
+		  pest_in_end = pstin * rto_end
+		  pest_stor_end = ch_water(jrch)%pest(ipest) * rto_end
+		
+		  !! calculate outflow and storage in water column
+		  rto_out = ht2%flo / ch_stor(jrch)%flo
+		
+		  if(rto_out <= 1.)then
+		    hcs2%pest(ipest) = rto_out * pest_stor_end
+		    ch_water(jrch)%pest(ipest) = pest_in_end + pest_stor_end * (1. - rto_out)
+		  else
+		    rto_out = (wtrin - ht2%flo) / ht1%flo
+		    rto_out = max(0.,min(1.,rto_out))
+		  
+		    hcs2%pest(ipest) = pest_stor_end + (1. - rto_out) * pest_in_end
+		    ch_water(jrch)%pest(ipest) = pest_in_end * rto_out
+		  end if
+        end if
+		
+		    
       end do
 
       return

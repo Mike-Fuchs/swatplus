@@ -543,10 +543,10 @@
         ht2%solp = ht2%solp + ebank_t * sd_ch(ich)%p_bio
         
         !! route constituents
-        call ch_rtpest
+        !call ch_rtpest
         !! call mike winchell's new routine for pesticide routing
         ! call ch_rtpest2
-        call ch_rtpath
+        !call ch_rtpath
       end if
       
       end if    ! peakrate > 0
@@ -653,6 +653,12 @@
       if(cs_db%num_salts > 0 .or. cs_db%num_cs > 0) then
         hcs3 = hcs2 + ch_water(ich) !incoming + storage
       endif
+      
+      !! route constituents
+        call ch_rtpest
+        !! call mike winchell's new routine for pesticide routing
+        ! call ch_rtpest2
+        call ch_rtpath
       
       !rtb hydrograph separation
       if (rttime > det) then      ! ht1 = incoming + storage
