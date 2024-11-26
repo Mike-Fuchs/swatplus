@@ -1,0 +1,1166 @@
+diff --git "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/aqu_1d_control.f90" "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/aqu_1d_control.f90"
+index d41bf73..1d69727 100644
+--- "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/aqu_1d_control.f90"	
++++ "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/aqu_1d_control.f90"	
+@@ -9,8 +9,8 @@
+       use pesticide_data_module
+       use aqu_pesticide_module
+       use salt_module
+-      use salt_aquifer
+-      use cs_aquifer
++      use salt_aquifer_module
++      use cs_aquifer_module
+       use ch_pesticide_module
+       
+       implicit none
+diff --git "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/aqu_cs_output.f90" "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/aqu_cs_output.f90"
+index dc3fefe..93f7889 100644
+--- "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/aqu_cs_output.f90"	
++++ "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/aqu_cs_output.f90"	
+@@ -4,7 +4,7 @@
+       use basin_module
+       use aquifer_module
+       use hydrograph_module, only : ob, sp_ob1
+-      use cs_aquifer
++      use cs_aquifer_module
+       use constituent_mass_module
+       
+       implicit none
+diff --git "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/aqu_initial.f90" "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/aqu_initial.f90"
+index e8fad79..4043d2c 100644
+--- "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/aqu_initial.f90"	
++++ "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/aqu_initial.f90"	
+@@ -5,9 +5,9 @@
+       use constituent_mass_module
+       use aqu_pesticide_module
+       use salt_module !rtb salt
+-      use salt_aquifer !rtb salt
++      use salt_aquifer_module !rtb salt
+       use cs_module !rtb cs
+-      use cs_aquifer !rtb cs
++      use cs_aquifer_module !rtb cs
+        
+       implicit none
+       
+@@ -122,7 +122,9 @@
+           allocate (aqupst_a(iaq)%pest(cs_db%num_pests))
+           allocate (cs_aqu(iaq)%path(cs_db%num_paths))
+           allocate (cs_aqu(iaq)%hmet(cs_db%num_metals))
+-          allocate (cs_aqu(iaq)%salt(cs_db%num_salts))
++          cs_aqu(iaq)%pest = 0.
++		  cs_aqu(iaq)%path = 0.
++		  cs_aqu(iaq)%hmet = 0.	
+         end if
+         !salts !rtb salt
+         if (cs_db%num_salts > 0) then
+diff --git "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/aqu_salt_output.f90" "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/aqu_salt_output.f90"
+index 3a9650d..1ed0787 100644
+--- "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/aqu_salt_output.f90"	
++++ "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/aqu_salt_output.f90"	
+@@ -4,7 +4,7 @@
+       use basin_module
+       use aquifer_module
+       use hydrograph_module, only : ob, sp_ob1
+-      use salt_aquifer
++      use salt_aquifer_module
+       use constituent_mass_module
+       
+       implicit none
+diff --git "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/carbon_module.f90" "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/carbon_module.f90"
+index 84e8a94..20c6cd8 100644
+--- "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/carbon_module.f90"	
++++ "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/carbon_module.f90"	
+@@ -14,16 +14,16 @@
+         real :: part_DOC_para = 4000.   !           |organic carbon partition coefficient 1000 to 1200 ! 500-2000 !replacing KOC=Liquid-solid partition coefficient for Microbial Biomass (10^3 m3 Mg-1)
+         real :: hlife_doc_para = 50.	!days       |DOC half life in groundwater, calculating DOC decay in groundwater ! 0-100
+         !Allocation of CO2 and Carbon transformation
+-	    real :: ABCO2_para_sur = 0.6    !           |Allocation from Microbial Biomass C pool to CO2; 0.6 (surface Litter), 0.85 - 0.68 × (CLAY+SILT) (all other layers) (Parton et al., 1993, 1994)
+-        real :: ABCO2_para_sub = 0.	!           |Calculated -Allocation from Microbial Biomass C pool to CO2; 0.6 (surface Litter), 0.85 - 0.68 × (CLAY+SILT) (all other layers) (Parton et al., 1993, 1994)
++	    real :: ABCO2_para_sur = 0.6    !           |Allocation from Microbial Biomass C pool to CO2; 0.6 (surface Litter), 0.85 - 0.68 x (CLAY+SILT) (all other layers) (Parton et al., 1993, 1994)
++        real :: ABCO2_para_sub = 0.	!           |Calculated -Allocation from Microbial Biomass C pool to CO2; 0.6 (surface Litter), 0.85 - 0.68 x (CLAY+SILT) (all other layers) (Parton et al., 1993, 1994)
+ 	    real :: ABP_para_sur = 0.0      !           |Allocation from Biomass to passive Humus; 0 (surface Litter), 0.003 + 0.032 x SOL_CLAY (all other layers) (Parton et al., 1993, 1994)
+         real :: ABP_para_sub = 0.0      !           |Calculated - Allocation from Biomass to passive Humus; 0 (surface Litter), 0.003 + 0.032 x SOL_CLAY (all other layers) (Parton et al., 1993, 1994)
+         real :: ALMCO2_para_sur	= 0.6	!           |Allocation from metabolic Litter to CO2; 0.6 (surface Litter), 0.55 (all other layers) (Parton et al., 1993, 1994)
+         real :: ALMCO2_para_sub	= 0.55	!           |Allocation from metabolic Litter to CO2; 0.6 (surface Litter), 0.55 (all other layers) (Parton et al., 1993, 1994)
+         real :: ALSLNCO2_para_sur = 0.6	!           |Allocation from non-lignin of structural Litter to CO2; 0.6 (surface Litter), 0.55 (all other layers) (Parton et al., 1993, 1994)
+         real :: ALSLNCO2_para_sub =0.55 !	        |Allocation from non-lignin of structural Litter to CO2; 0.6 (surface Litter), 0.55 (all other layers) (Parton et al., 1993, 1994)
+-        real :: ASP_para_sur = 0.0	    !           |Allocation from slow Humus to passive; 0 (surface Litter), 0.003 + 0.00009 × CLAF (all other layers) (Parton et al., 1993, 1994)
+-        real :: ASP_para_sub = 0.0	    !           |Calculated - Allocation from slow Humus to passive; 0 (surface Litter), 0.003 + 0.00009 × CLAF (all other layers) (Parton et al., 1993, 1994)
++        real :: ASP_para_sur = 0.0	    !           |Allocation from slow Humus to passive; 0 (surface Litter), 0.003 + 0.00009 x CLAF (all other layers) (Parton et al., 1993, 1994)
++        real :: ASP_para_sub = 0.0	    !           |Calculated - Allocation from slow Humus to passive; 0 (surface Litter), 0.003 + 0.00009 x CLAF (all other layers) (Parton et al., 1993, 1994)
+         real :: ALSLCO2_para = 0.3	    !           |Allocation from lignin of structural Litter to CO2; 0.3 (Parton et al., 1993, 1994)
+         real :: APCO2_para = 0.55	    !           |Allocation from passive Humus to CO2; 0.55 (Parton et al., 1993, 1994)
+         real :: ASCO2_para = 0.55	    !           |Allocation from slow Humus to CO2; 0.55 (Parton et al., 1993, 1994)
+@@ -39,9 +39,9 @@
+         real :: LSR_para_sur = 0.0107	!           |Rate of potential transformation of structural Litter under optimal conditions (surface = 0.0107 d-1; all other layers = 0.0132 d-1) (Parton et al., 1994)
+         real :: LSR_para_sub = 0.0132	!           |Rate of potential transformation of structural Litter under optimal conditions (surface = 0.0107 d-1; all other layers = 0.0132 d-1) (Parton et al., 1994)
+         !Soil texture controls of microbial activity
+-        real :: XBM_para_sur = 1.0	    !           |Control on transformation of microbial Biomass by soil texture and structure. Its values: surface Litter layer = 1; all other layers = 1 – 0.75 × (SILT + CLAY) (Parton et al., 1993, 1994)
+-        real :: XBM_para_sub = 0.0	    !           |Calculated - Control on transformation of microbial Biomass by soil texture and structure. Its values: surface Litter layer = 1; all other layers = 1 – 0.75 × (SILT + CLAY) (Parton et al., 1993, 1994)
+-        real :: XLSLF_para = 0.0	    !           |Calculated - Control on potential transformation of structural Litter by lignin fraction of structural Litter [XLSLF = exp(-3 × LSLF) (Parton et al., 1993, 1994)]
++        real :: XBM_para_sur = 1.0	    !           |Control on transformation of microbial Biomass by soil texture and structure. Its values: surface Litter layer = 1; all other layers = 1  0.75 x (SILT + CLAY) (Parton et al., 1993, 1994)
++        real :: XBM_para_sub = 0.0	    !           |Calculated - Control on transformation of microbial Biomass by soil texture and structure. Its values: surface Litter layer = 1; all other layers = 1  0.75 x (SILT + CLAY) (Parton et al., 1993, 1994)
++        real :: XLSLF_para = 0.0	    !           |Calculated - Control on potential transformation of structural Litter by lignin fraction of structural Litter [XLSLF = exp(-3 x LSLF) (Parton et al., 1993, 1994)]
+         !Oxygen factor control parameters
+         real :: OX_aa_para = 10.0	    !           !Coefficient in calculating oxygen factor 
+         real :: OX_bb_para = 0.035	    !           |Coefficient in calculating oxygen factor 
+@@ -512,4 +512,4 @@
+         hru2%emit_c = hru1%emit_c / const
+       end function carbon_plant_gl_div
+       
+-     end module carbon_module   
+\ No newline at end of file
++     end module carbon_module   
+diff --git "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/cbn_zhang2.f90" "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/cbn_zhang2.f90"
+index ff3343c..3f8798e 100644
+--- "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/cbn_zhang2.f90"	
++++ "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/cbn_zhang2.f90"	
+@@ -19,7 +19,7 @@
+         !!==============================================
+         !! local variables
+        !rnmn
+-       !abco2   : allocation from biomass to co2; 0.6 (surface litter), 0.85–0.68*(claf + silf) (all other layers) (parton et al., 1993, 1994)
++       !abco2   : allocation from biomass to co2; 0.6 (surface litter), 0.850.68*(claf + silf) (all other layers) (parton et al., 1993, 1994)
+        !abl     : carbon allocation from biomass to leaching; abl = (1-exp(-f/(0.01* sw+ 0.1*(kdbm)*db)) (williams, 1995)
+        !abp     : allocation from biomass to passive humus; 0 (surface litter), 0.003 + 0.032*claf (all other layers) (parton et al., 1993, 1994)
+        !almco2  : allocation from metabolic litter to co2; 0.6 (surface litter), 0.55 (all other layers) (parton et al., 1993, 1994)
+@@ -42,7 +42,7 @@
+        !cpn3    : potential n deficit resulting from the transformation of microbial biomass; calc as (pn5+pn6)-bmntp if bmntp < (pn5+pn6), otherwise = 0 (kg n ha-1 day-1)
+        !cpn4    : potential n deficit resulting from the transformation of slow humus; calc as (pn7+pn8)-hsntp if hsntp < (pn7+pn8), otherwise = 0 (kg n ha-1 day-1)
+        !cpn5    : potential n deficit resulting from the transformation of passive humus; calc as pn9-hpntp if hpntp < pn9, otherwise = 0 (kg n ha-1 day-1)
+-       !cs      : combined factor controlling biological processes [cs = sqrt(cdg×sut)* 0.8*ox*x1), cs < 10; cs = 10, cs>=10 (williams, 1995)]
++       !cs      : combined factor controlling biological processes [cs = sqrt(cdg * sut)* 0.8*ox*x1), cs < 10; cs = 10, cs>=10 (williams, 1995)]
+        !dbp     : soil bulk density of plow layer (mg m-3) (not used)
+        !hsctp   : potential transformation of c in slow humus (kg ha-1 day-1)
+        !hsntp   : potential transformation of n in slow humus (kg ha-1 day-1)
+@@ -52,7 +52,7 @@
+                 !layers = 0.000012 day-1) (parton et al.,1993, 1994)
+        !hsr     : rate of transformation of slow humus under optimal conditions (all layers
+                 != 0.0005 day-1) (parton et al., 1993, 1994; vitousek et al., 1993)
+-       !koc     : liquid–solid partition coefficient for microbial biomass (10^3 m^3 mg-1)     
++       !koc     : liquid solid partition coefficient for microbial biomass (10^3 m^3 mg-1)
+        !lmf     : fraction of the litter that is metabolic    
+        !lmnf    : fraction of metabolic litter that is n (kg kg-1)  
+        !lmr     : rate of transformation of metabolic litter under optimal conditions (surface =
+@@ -897,4 +897,4 @@
+       end do      !soil layer loop
+ 
+     return
+-    end subroutine cbn_zhang2
+\ No newline at end of file
++    end subroutine cbn_zhang2
+diff --git "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/ch_rtmusk.f90" "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/ch_rtmusk.f90"
+index 4cb9416..e1008c1 100644
+--- "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/ch_rtmusk.f90"	
++++ "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/ch_rtmusk.f90"	
+@@ -218,14 +218,14 @@
+       
+       !! compute water balance - precip, evap and seep
+       !! km * m * 1000 m/km * ha/10000 m2 = ha
+-      ch_wat_d(ich)%area_ha = sd_ch(ich)%chl * sd_ch(ich)%chw / 10.
++      ch_wat_d(jrch)%area_ha = sd_ch(jrch)%chl * (sd_ch(jrch)%chw + 2. * sd_ch(jrch)%chd * sd_ch(jrch)%chss) / 10.
+       !! m3 = 10. * mm * ha
+-      ch_wat_d(ich)%precip = 10. * wst(iwst)%weat%precip * ch_wat_d(ich)%area_ha
+-      ch_wat_d(ich)%evap = 10. * bsn_prm%evrch * wst(iwst)%weat%pet * ch_wat_d(ich)%area_ha
+-      ch_wat_d(ich)%seep = 10. * sd_ch(ich)%chk * ch_wat_d(ich)%area_ha      !k units to mm/d
++      ch_wat_d(jrch)%precip = 10. * wst(iwst)%weat%precip * ch_wat_d(jrch)%area_ha
++      ch_wat_d(jrch)%evap = 10. * bsn_prm%evrch * wst(iwst)%weat%pet * ch_wat_d(jrch)%area_ha
++      ch_wat_d(jrch)%seep = 10. * sd_ch(jrch)%chk * ch_wat_d(jrch)%area_ha      !k units to mm/d
+       
+       !! add precip
+-      ht2%flo = ht2%flo + ch_wat_d(ich)%precip
++      ht2%flo = ht2%flo + ch_wat_d(jrch)%precip
+       
+       !! calculate transmission losses
+       if (ht2%flo > 1.e-6) then
+@@ -249,7 +249,7 @@
+         if (dep_flo <= sd_ch(jrch)%chd) then
+           topw = ch_rcurv(jrch)%out2%surf_area
+         else
+-          topw = 1000. * sd_ch(jrch)%chl * sd_ch(jrch)%chw
++          topw = 1000. * sd_ch(jrch)%chl * (sd_ch(jrch)%chw + 2. * sd_ch(jrch)%chd * sd_ch(jrch)%chss)
+         end if
+         iwst = ob(icmd)%wst
+         !! mm/day * m2 / (1000. * sd_ch(jrch)%msk%nsteps)
+diff --git "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/ch_rtpest.f90" "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/ch_rtpest.f90"
+index 35dba2c..4b0b1fa 100644
+--- "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/ch_rtpest.f90"	
++++ "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/ch_rtpest.f90"	
+@@ -104,6 +104,11 @@
+       real :: pest_init         !mg            |amount of pesticide before decay
+       real :: pest_end          !mg            |amount of pesticide after decay
+       real :: rto_out           !none          |ratio of outflow to sum of outflow and storage
++	  real :: rto_end
++	  real :: pest_in_end
++	  real :: pest_stor_end
++	  real :: c_in
++      real :: c_stor
+ 
+       !! zero outputs
+       chpst_d(jrch) = chpstz
+@@ -126,7 +131,7 @@
+ 
+         !! calculate mass of pesticide in reach
+         chpstmass = pstin + ch_water(jrch)%pest(ipest)
+-      
++        
+         !! calculate mass of pesticide in bed sediment
+         sedpstmass = ch_benthic(jrch)%pest(ipest)
+ 
+@@ -146,6 +151,7 @@
+ 
+           !! calculate fraction of soluble and sorbed pesticide
+           frsol = 1. / (1. + kd * sedcon)
++          frsol = max(min(frsol,1.),0.)
+           frsrb = 1. - frsol
+ 
+           !! ASSUME DENSITY=2.6E6; KD2=KD1
+@@ -160,7 +166,7 @@
+           !! calculate amount of pesticide that undergoes chemical or biological degradation on day in reach
+           pest_init = chpstmass
+           if (pest_init > 1.e-12) then
+-            pest_end = chpstmass * (pestcp(jpst)%decay_a * tday)
++            pest_end = chpstmass * Exp(-.693 / pestdb(jpst)%aq_hlife * tday)
+             chpstmass = pest_end
+             chpst%pest(ipest)%react = pest_init - pest_end
+             !! add decay to daughter pesticides
+@@ -204,7 +210,8 @@
+           chpstmass = chpstmass + chpst%pest(ipest)%resus
+ 
+           !! calculate diffusion of pesticide between reach and sediment
+-          chpst%pest(ipest)%difus = sd_ch(jrch)%aq_mix(ipest) * (fd2 * sedpstmass - frsol * chpstmass) * tday / depth
++		  chpst%pest(ipest)%difus = 0.
++          !chpst%pest(ipest)%difus = sd_ch(jrch)%aq_mix(ipest) * (fd2 * sedpstmass - frsol * chpstmass) * tday / depth
+           if (chpst%pest(ipest)%difus > 0.) then
+             if (chpst%pest(ipest)%difus > sedpstmass) then
+               chpst%pest(ipest)%difus = sedpstmass
+@@ -271,12 +278,41 @@
+         end if
+         ch_benthic(jrch)%pest(ipest) = sedpstmass
+ 
+-        !! calculate outflow and storage in water column
+-        rto_out = ht2%flo / (1.e-6 + ht2%flo + ch_stor(jrch)%flo)
+-        rto_out = Min (1., rto_out)
+-        hcs2%pest(ipest) = rto_out * chpstmass
+-        ch_water(jrch)%pest(ipest) = (1. - rto_out) * chpstmass
++        !! check incomming and stored concentration        
++        c_in = pstin / wtrin
++        c_stor = ch_water(jrch)%pest(ipest) / ch_stor(jrch)%flo
+         
++        if (c_in >= c_stor) then
++          !! calculate outflow and storage in water column
++          rto_out = ht2%flo / (1.e-6 + ht2%flo + ch_stor(jrch)%flo)
++          rto_out = Min (1., rto_out)
++          hcs2%pest(ipest) = rto_out * chpstmass
++          ch_water(jrch)%pest(ipest) = (1. - rto_out) * chpstmass
++        else
++          !! calculate ratio of initial pesticide available at end of timestep
++		  rto_end = chpstmass / (pstin + ch_water(jrch)%pest(ipest))
++		  rto_end = max(0.,min(1.,rto_end))
++		
++		  !! calculate pesticide incomming and stored at the end of the timestep
++		  pest_in_end = pstin * rto_end
++		  pest_stor_end = ch_water(jrch)%pest(ipest) * rto_end
++		
++		  !! calculate outflow and storage in water column
++		  rto_out = ht2%flo / ch_stor(jrch)%flo
++		
++		  if(rto_out <= 1.)then
++		    hcs2%pest(ipest) = rto_out * pest_stor_end
++		    ch_water(jrch)%pest(ipest) = pest_in_end + pest_stor_end * (1. - rto_out)
++		  else
++		    rto_out = (wtrin - ht2%flo) / ht1%flo
++		    rto_out = max(0.,min(1.,rto_out))
++		  
++		    hcs2%pest(ipest) = pest_stor_end + (1. - rto_out) * pest_in_end
++		    ch_water(jrch)%pest(ipest) = pest_in_end * rto_out
++		  end if
++        end if
++		
++		    
+       end do
+ 
+       return
+diff --git "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/command.f90" "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/command.f90"
+index 7be5042..8ca9fcb 100644
+--- "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/command.f90"	
++++ "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/command.f90"	
+@@ -327,6 +327,7 @@
+ 
+               if(cs_db%num_salts > 0) call recall_salt(irec) !rtb salt
+               if(cs_db%num_cs > 0) call recall_cs(irec) !rtb cs
++              if(cs_db%num_pests > 0) call recall_pest(irec) !rtb cs
+               
+           !case ("exco")   ! export coefficient hyds are set at start
+ 
+diff --git "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/constit_db_read.f90" "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/constit_db_read.f90"
+index 86fc183..18d2c75 100644
+--- "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/constit_db_read.f90"	
++++ "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/constit_db_read.f90"	
+@@ -35,33 +35,33 @@
+         if (eof < 0) exit
+         read (106,*,iostat=eof) cs_db%num_pests
+         if (eof < 0) exit
+-        allocate (cs_db%pests(0:cs_db%num_pests))
+-        allocate (cs_db%pest_num(0:cs_db%num_pests))
++        allocate (cs_db%pests(1:cs_db%num_pests))
++        allocate (cs_db%pest_num(1:cs_db%num_pests))
+         read (106,*,iostat=eof) (cs_db%pests(i), i = 1, cs_db%num_pests)
+         if (eof < 0) exit
+         read (106,*,iostat=eof) cs_db%num_paths
+         if (eof < 0) exit
+         allocate (cs_db%paths(cs_db%num_paths))
+-        allocate (cs_db%path_num(0:cs_db%num_paths))
++        allocate (cs_db%path_num(1:cs_db%num_paths))
+         read (106,*,iostat=eof) (cs_db%paths(i), i = 1, cs_db%num_paths)
+         if (eof < 0) exit
+         read (106,*,iostat=eof) cs_db%num_metals
+         if (eof < 0) exit
+         allocate (cs_db%metals(cs_db%num_metals))
+-        allocate (cs_db%metals_num(0:cs_db%num_metals))
++        allocate (cs_db%metals_num(1:cs_db%num_metals))
+         read (106,*,iostat=eof) (cs_db%metals(i), i = 1, cs_db%num_metals)
+         if (eof < 0) exit
+         !salt ions
+         read (106,*,iostat=eof) cs_db%num_salts
+         if (eof < 0) exit
+         allocate (cs_db%salts(cs_db%num_salts))
+-        allocate (cs_db%salts_num(0:cs_db%num_salts))
++        allocate (cs_db%salts_num(1:cs_db%num_salts))
+         read (106,*,iostat=eof) (cs_db%salts(i), i = 1, cs_db%num_salts)
+         !other constituents
+         read (106,*,iostat=eof) cs_db%num_cs
+         if (eof < 0) exit
+         allocate (cs_db%cs(cs_db%num_cs))
+-        allocate (cs_db%cs_num (0:cs_db%num_cs))
++        allocate (cs_db%cs_num (1:cs_db%num_cs))
+         read (106,*,iostat=eof) (cs_db%cs(i), i = 1, cs_db%num_cs)
+         exit
+       end do
+diff --git "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/constituent_mass_module.f90" "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/constituent_mass_module.f90"
+index 6822f3d..e51d76b 100644
+--- "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/constituent_mass_module.f90"	
++++ "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/constituent_mass_module.f90"	
+@@ -235,7 +235,7 @@
+          character (len=16) :: name
+          integer :: num = 0                    !number of elements
+          integer :: typ                        !recall type - 1=day, 2=mon, 3=year
+-         character(len=13) :: filename         !filename
++         character(len=20) :: filename         !filename
+          !hyd_output units are in cms and mg/L
+          type (constituent_mass), dimension (:,:), allocatable :: hd_pest
+       end type recall_pesticide_inputs
+diff --git "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/cs_aquifer.f90" "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/cs_aquifer_module.f90"
+similarity index 99%
+rename from "C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/cs_aquifer.f90"
+rename to "C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/cs_aquifer_module.f90"
+index 0b8d737..9d6cbba 100644
+--- "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/cs_aquifer.f90"	
++++ "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/cs_aquifer_module.f90"	
+@@ -1,5 +1,5 @@
+       !module for constituent mass balance in aquifers (rtb cs)
+-      module cs_aquifer
++      module cs_aquifer_module
+       
+       implicit none
+ 
+diff --git "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/cs_balance.f90" "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/cs_balance.f90"
+index c549642..b62d033 100644
+--- "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/cs_balance.f90"	
++++ "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/cs_balance.f90"	
+@@ -13,7 +13,7 @@
+       use time_module
+       use constituent_mass_module
+       use cs_module
+-      use cs_aquifer
++      use cs_aquifer_module
+       use res_cs_module, only : wetcs_d,rescs_d
+       use ch_cs_module, only: chcs_d
+       use gwflow_module, only : gw_solute_flag,gwsol_ss,ncell,ncell,gw_state,gwsol_state
+diff --git "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/cs_divert.f90" "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/cs_divert.f90"
+index 231a6b4..7a565d3 100644
+--- "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/cs_divert.f90"	
++++ "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/cs_divert.f90"	
+@@ -12,7 +12,7 @@
+       use hru_module, only : hru
+       use basin_module, only : bsn_cc
+       use cs_module !rtb cs
+-      use cs_aquifer !rtb cs
++      use cs_aquifer_module !rtb cs
+       use ch_cs_module !rtb cs
+       use res_cs_module !rtb cs
+       use constituent_mass_module
+diff --git "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/cs_irrig.f90" "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/cs_irrig.f90"
+index 45c41d2..9c3ad31 100644
+--- "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/cs_irrig.f90"	
++++ "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/cs_irrig.f90"	
+@@ -11,7 +11,7 @@
+       use hydrograph_module, only : irrig,res,sp_ob1,ob
+       use hru_module, only : hru
+       use cs_module !rtb cs
+-      use cs_aquifer !rtb cs
++      use cs_aquifer_module !rtb cs
+       use ch_cs_module !rtb cs
+       use res_cs_module !rtb cs
+       use basin_module, only : bsn_cc
+diff --git "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/cs_rctn_aqu.f90" "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/cs_rctn_aqu.f90"
+index b1fc715..3ef6dac 100644
+--- "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/cs_rctn_aqu.f90"	
++++ "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/cs_rctn_aqu.f90"	
+@@ -9,7 +9,7 @@
+       use cs_data_module
+       use organic_mineral_mass_module
+       use cs_module
+-      use cs_aquifer
++      use cs_aquifer_module
+ 
+       implicit none
+ 
+diff --git "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/cs_sorb_aqu.f90" "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/cs_sorb_aqu.f90"
+index b538625..5d72542 100644
+--- "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/cs_sorb_aqu.f90"	
++++ "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/cs_sorb_aqu.f90"	
+@@ -7,7 +7,7 @@
+       use aquifer_module
+       use organic_mineral_mass_module
+       use constituent_mass_module
+-      use cs_aquifer
++      use cs_aquifer_module
+       use cs_data_module
+       
+       implicit none
+diff --git "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/dr_read_path.f90" "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/dr_path_read.f90"
+similarity index 100%
+rename from "C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/dr_read_path.f90"
+rename to "C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/dr_path_read.f90"
+diff --git "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/header_const.f90" "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/header_const.f90"
+index af051bf..d218291 100644
+--- "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/header_const.f90"	
++++ "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/header_const.f90"	
+@@ -7,7 +7,7 @@
+      use ch_cs_module
+      use res_cs_module
+      use cs_module
+-     use cs_aquifer
++     use cs_aquifer_module
+      
+      implicit none 
+ 
+diff --git "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/header_salt.f90" "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/header_salt.f90"
+index 17cd045..8c1cf14 100644
+--- "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/header_salt.f90"	
++++ "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/header_salt.f90"	
+@@ -7,7 +7,7 @@
+      use ch_salt_module
+      use res_salt_module
+      use salt_module
+-     use salt_aquifer
++     use salt_aquifer_module
+      
+      implicit none 
+ 
+diff --git "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/hyd_connect.f90" "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/hyd_connect.f90"
+index 7aa26fd..4d5e482 100644
+--- "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/hyd_connect.f90"	
++++ "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/hyd_connect.f90"	
+@@ -162,6 +162,7 @@
+         call recall_read
+         call recall_read_salt !rtb salt
+         call recall_read_cs !rtb cs
++        call recall_read_pest
+       end if
+                 
+       !read connect file for export coefficients
+diff --git "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/ls_read_parms_cal.f90" "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/ls_read_lsparms_cal.f90"
+similarity index 100%
+rename from "C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/ls_read_parms_cal.f90"
+rename to "C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/ls_read_lsparms_cal.f90"
+diff --git "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/pest_decay.f90" "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/pest_decay.f90"
+index e3c5e04..8e6cc21 100644
+--- "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/pest_decay.f90"	
++++ "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/pest_decay.f90"	
+@@ -35,6 +35,7 @@
+       real :: pest_end           !kg/ha    |amount of pesticide present at end of day
+       real :: pst_decay          !kg/ha    |amount of pesticide decay in soil layer during day
+       real :: pst_decay_s        !kg/ha    |amount of pesticide decay in soil profile during day
++      real :: pst_decay_f        !kg/ha    |amount of pesticide decay in foliage during day
+       real :: metab_decay        !kg/ha    |amount of metabolite decay in soil layer during day
+ 
+       j = ihru
+@@ -69,24 +70,27 @@
+           hpestb_d(j)%pest(k)%decay_s = pst_decay_s
+ 
+           !! calculate degradation on plant foliage
+-	      !! adjust foliar pesticide for wash off
++	      pst_decay_f = 0.
++		  !! adjust foliar pesticide for wash off
+           do ipl = 1, pcom(j)%npl
+             pest_init = cs_pl(j)%pl_on(ipl)%pest(k)
+             if (pest_init > 1.e-12) then
+               pest_end = pest_init * pestcp(ipest_db)%decay_f
+               cs_pl(j)%pl_on(ipl)%pest(k) = pest_end
+-              hpestb_d(j)%pest(k)%decay_f = pest_init - pest_end
++              pst_decay = (pest_init - pest_end)
++              pst_decay_f = pst_decay_f + pst_decay
+               !! add decay to daughter pesticides
+               do imeta = 1, pestcp(ipest_db)%num_metab
+                 ipseq = pestcp(ipest_db)%daughter(imeta)%num
+                 ipdb = cs_db%pest_num(ipseq)
+                 mol_wt_rto = pestdb(ipdb)%mol_wt / pestdb(ipest_db)%mol_wt
+-                hpestb_d(j)%pest(ipseq)%metab_f = hpestb_d(j)%pest(ipseq)%metab_f + (pest_init - pest_end) *     &
+-                                           pestcp(ipest_db)%daughter(imeta)%soil_fr * mol_wt_rto
+-                cs_pl(j)%pl_on(ipl)%pest(ipseq) = cs_pl(j)%pl_on(ipl)%pest(ipseq) + hpestb_d(j)%pest(ipseq)%metab_f
++                metab_decay = pst_decay * pestcp(ipest_db)%daughter(imeta)%foliar_fr * mol_wt_rto
++                hpestb_d(j)%pest(ipseq)%metab_f = hpestb_d(j)%pest(ipseq)%metab_f + metab_decay
++                cs_pl(j)%pl_on(ipl)%pest(ipseq) = cs_pl(j)%pl_on(ipl)%pest(ipseq) + metab_decay
+               end do
+             end if 
+           end do
++        hpestb_d(j)%pest(k)%decay_f = pst_decay_f
+         end if
+       end do
+       
+diff --git "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/pest_lch.f90" "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/pest_lch.f90"
+index a3fbc06..3874e6a 100644
+--- "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/pest_lch.f90"	
++++ "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/pest_lch.f90"	
+@@ -54,6 +54,7 @@
+           hpestb_d(j)%pest(k)%perc = 0.
+           hpestb_d(j)%pest(k)%surq = 0.
+           hpestb_d(j)%pest(k)%latq = 0.
++		  hpestb_d(j)%pest(k)%tileq = 0.
+         end do
+ 
+         do ly = 1, soil(j)%nly
+diff --git "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/pest_pl_up.f90" "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/pest_pl_up.f90"
+index 48304d6..de7a149 100644
+--- "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/pest_pl_up.f90"	
++++ "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/pest_pl_up.f90"	
+@@ -32,7 +32,7 @@
+           if (cs_pl(j)%pl_on(ipl)%pest(k) >= 0.0001) then
+             if (ipest_db > 0) then
+               do ly = 1, soil(j)%nly
+-                pest_up = pestdb(ipest_db)%pl_uptake * pcom(j)%plcur(ipl)%uptake(ly) / soil(j)%phys(k)%st   &
++                pest_up = pestdb(ipest_db)%pl_uptake * pcom(j)%plcur(ipl)%uptake(ly) / soil(j)%phys(ly)%st   &
+                                                                                 * cs_soil(j)%ly(ly)%pest(k)
+                 if (pest_up > cs_soil(j)%ly(ly)%pest(k)) pest_up = cs_soil(j)%ly(ly)%pest(k)
+                 cs_soil(j)%ly(ly)%pest(k) = cs_soil(j)%ly(ly)%pest(k) - pest_up
+diff --git "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/pest_soil_tot.f90" "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/pest_soil_tot.f90"
+index 7abc1a0..be777a4 100644
+--- "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/pest_soil_tot.f90"	
++++ "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/pest_soil_tot.f90"	
+@@ -22,9 +22,11 @@
+       if (cs_db%num_pests == 0) return
+ 
+       do k = 1, cs_db%num_pests
++        hpestb_d(j)%pest(k)%plant = 0.
++		hpestb_d(j)%pest(k)%in_plant = 0.
+         do ipl = 1, pcom(j)%npl
+-          hpestb_d(j)%pest(k)%plant = cs_pl(j)%pl_on(ipl)%pest(k)
+-          hpestb_d(j)%pest(k)%in_plant = cs_pl(j)%pl_in(ipl)%pest(k) 
++          hpestb_d(j)%pest(k)%plant = hpestb_d(j)%pest(k)%plant + cs_pl(j)%pl_on(ipl)%pest(k)
++          hpestb_d(j)%pest(k)%in_plant = hpestb_d(j)%pest(k)%in_plant + cs_pl(j)%pl_in(ipl)%pest(k) 
+         end do
+         hpestb_d(j)%pest(k)%soil = 0.
+         do ly = 1, soil(j)%nly
+diff --git "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/pest_washp.f90" "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/pest_washp.f90"
+index edc42ac..1a05356 100644
+--- "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/pest_washp.f90"	
++++ "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/pest_washp.f90"	
+@@ -26,6 +26,7 @@
+       do k = 1, cs_db%num_pests
+         ipest_db = cs_db%pest_num(k)
+ 	    !! adjust foliar pesticide for wash off
++        hpestb_d(j)%pest(k)%wash = 0.
+         do ipl = 1, pcom(j)%npl
+           if (cs_pl(j)%pl_on(ipl)%pest(k) >= 0.0001) then
+             if (ipest_db > 0) then
+@@ -33,7 +34,7 @@
+               if (pest_soil > cs_pl(j)%pl_on(ipl)%pest(k)) pest_soil = cs_pl(j)%pl_on(ipl)%pest(k)
+               cs_soil(j)%ly(1)%pest(k) = cs_soil(j)%ly(1)%pest(k) + pest_soil
+               cs_pl(j)%pl_on(ipl)%pest(k) = cs_pl(j)%pl_on(ipl)%pest(k) - pest_soil
+-              hpestb_d(j)%pest(k)%wash = pest_soil
++              hpestb_d(j)%pest(k)%wash = hpestb_d(j)%pest(k)%wash + pest_soil
+             end if
+           end if 
+         end do
+diff --git "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/pl_grow.f90" "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/pl_grow.f90"
+index 37ec92c..35ea9ff 100644
+--- "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/pl_grow.f90"	
++++ "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/pl_grow.f90"	
+@@ -23,7 +23,7 @@
+         
+         !! check for start and end of dormancy of temp-based growth plant
+         idp = pcom(j)%plcur(ipl)%idplt
+-        if (pldb(idp)%trig == "temp_gro") then
++        if (pldb(idp)%trig == "temp_gro" .and. pcom(j)%plcur(ipl)%gro == "y") then
+           call pl_dormant
+         end if
+        
+diff --git "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/pl_waterup.f90" "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/pl_waterup.f90"
+index 41f3726..b69e49b 100644
+--- "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/pl_waterup.f90"	
++++ "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/pl_waterup.f90"	
+@@ -122,14 +122,7 @@
+             sum = epmax(ipl) * (1. - Exp(-uptake%water_dis * gx / pcom(j)%plg(ipl)%root_dep)) / uptake%water_norm
+           end if
+ 
+-          pcom(j)%plcur(ipl)%epco = 0.9
+-          !! let second layer compensate - 10 mm layer causes problems wehn root depth is shallow
+-          if (k == 2) then
+-            wuse = sum      !epco is always 1.0 for second layer
+-          else
+-            wuse = sum - sump * (1. - pcom(j)%plcur(ipl)%epco)
+-          end if
+-          
++          wuse = sum - sump * (1. - pcom(j)%plcur(ipl)%epco)
+           ! adjust for impervious area
+           ulu = hru(j)%luse%urb_lu
+           !wuse = wuse * urbdb(ulu)%fcimp
+diff --git "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/recall_pest.f90" "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/recall_pest.f90"
+new file mode 100644
+index 0000000..172d668
+--- /dev/null
++++ "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/recall_pest.f90"	
+@@ -0,0 +1,81 @@
++      !rtb cs
++      !include constituent mass from point sources
++      subroutine recall_pest(irec)
++      
++      
++      use basin_module
++      use hydrograph_module
++      use time_module
++      use constituent_mass_module
++      use ch_cs_module
++      
++      implicit none 
++
++      !incoming variables
++      integer :: irec
++      
++      !local variables
++      integer :: ipest					!            |constituent counter
++      integer :: ichan        !            |id of source channel
++      real :: pest_conc         !g/m3        |concentration of constituent in source channel
++      real :: div_mass        !kg          |mass of constituent in diversion water
++      
++      
++      !depending on the point source type, add/remove constituent mass to object
++      obcs(icmd)%hd(1)%pest = 0.
++      if (cs_db%num_pests > 0) then
++        select case (rec_pest(irec)%typ)  
++          case (1)    !daily
++            if (time%yrc >= recall(irec)%start_yr .and. time%yrc <= recall(irec)%end_yr) then 
++              do ipest=1,cs_db%num_pests
++                if(recall(irec)%hd(time%day,time%yrs)%flo < 0) then
++                  !diversion: remove mass from channel directly
++                  ichan = ob(icmd)%obtypno_out(1) !channel from which water is diverted
++                  if(ch_stor(ichan)%flo > 10.) then !only proceed if channel has water
++                    pest_conc = (ch_water(ichan)%pest(ipest)*1000.) / ch_stor(ichan)%flo !g/m3 in channel water
++                    div_mass = (pest_conc * recall(irec)%hd(time%day,time%yrs)%flo) / 1000. !kg/day 
++                    if((div_mass*(-1)) > ch_water(ichan)%pest(ipest)) then
++                      div_mass = ch_water(ichan)%pest(ipest) * (-1) !only take what is there
++                    endif
++                    ch_water(ichan)%pest(ipest) = ch_water(ichan)%pest(ipest) + div_mass
++                  endif
++                else
++                  !source: add mass
++                  obcs(icmd)%hd(1)%pest(ipest) = rec_pest(irec)%hd_pest(time%day,time%yrs)%pest(ipest)
++				endif
++              enddo
++              recoutcsb_d(irec)%pest = obcs(icmd)%hd(1)%pest
++            else
++              obcs(icmd)%hd(1) = hin_csz
++            endif
++          case (2)    !monthly
++            if (time%yrc >= recall(irec)%start_yr .and. time%yrc <= recall(irec)%end_yr) then 
++              do ipest=1,cs_db%num_pests
++                obcs(icmd)%hd(1)%pest(ipest) = rec_pest(irec)%hd_pest(time%mo,time%yrs)%pest(ipest)
++              enddo
++                recoutcsb_d(irec)%pest = rec_pest(irec)%hd_pest(time%mo,time%yrs)%pest
++            else
++              obcs(icmd)%hd(1) = hin_csz
++            endif
++          case (3)    !annual
++            if (time%yrc >= rec_cs(irec)%start_yr .or. time%yrc <= rec_cs(irec)%end_yr) then
++              do ipest=1,cs_db%num_pests
++                obcs(icmd)%hd(1)%pest(ipest) = rec_pest(irec)%hd_pest(1,time%yrs)%pest(ipest)
++              enddo
++                recoutcsb_d(irec)%pest = rec_pest(irec)%hd_pest(1,time%yrs)%pest
++            else
++              obcs(icmd)%hd(1) = hin_csz
++            endif
++          case (4)    !average annual
++            if (time%yrc >= recall(irec)%start_yr .and. time%yrc <= recall(irec)%end_yr) then 
++              do ipest=1,cs_db%num_pests
++                obcs(icmd)%hd(1)%pest(ipest) = rec_pest(irec)%hd_pest(1,1)%pest(ipest)
++              enddo
++                recoutcsb_d(irec)%pest = rec_pest(irec)%hd_pest(1,1)%pest
++            endif  
++          end select
++      endif
++
++      
++      return
++      end subroutine recall_pest
+\ No newline at end of file
+diff --git "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/recall_read.f90" "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/recall_read.f90"
+index 588f959..9f23017 100644
+--- "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/recall_read.f90"	
++++ "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/recall_read.f90"	
+@@ -26,7 +26,6 @@
+       integer :: iyrs                 !           | 
+       integer :: iyr_prev             !none       |previous year
+       integer :: istep                !           | 
+-      integer :: ipestcom_db          !none       !pointer to pestcom_db - fix*** ?? 
+       integer :: ipc                  !none       |counter
+       integer :: ii                   !none       |counter
+       integer :: i                    !           |
+@@ -233,84 +232,5 @@
+       enddo
+       endif
+       
+-      !read all rec_pest files
+-      inquire (file="pest.com", exist=i_exist)
+-      if (i_exist ) then
+-      do
+-        open (107,file="pest.com")
+-        read (107,*,iostat=eof) titldum
+-        if (eof < 0) exit
+-        read (107,*,iostat=eof) header
+-        if (eof < 0) exit
+-        imax = 0
+-          do while (eof == 0)
+-            read (107,*,iostat=eof) i
+-            if (eof < 0) exit
+-            imax = Max(imax,i) 
+-          end do
+-          
+-      allocate (rec_pest(0:imax))
+-      rewind (107)
+-      read (107,*,iostat=eof) titldum
+-      if (eof < 0) exit
+-      read (107,*,iostat=eof) header
+-      if (eof < 0) exit
+-      
+-      do ipc = 1, db_mx%pestcom
+-        read (107,*,iostat=eof) ipestcom_db   !pointer to pestcom_db - fix***
+-        if (eof < 0) exit
+-
+-         do ii = 1, imax
+-           read (107,*,iostat=eof) i
+-           if (eof < 0) exit
+-           backspace (107)
+-           read (107,*,iostat = eof) k, rec_pest(i)%name, rec_pest(i)%typ, rec_pest(i)%filename
+-           if (eof < 0) exit
+-           open (108,file = rec_pest(i)%filename)
+-           read (108,*,iostat=eof) titldum
+-           if (eof < 0) exit
+-           read (108,*,iostat=eof) nbyr
+-           if (eof < 0) exit
+-           read (108,*,iostat=eof) header
+-           if (eof < 0) exit
+-        
+-        select case (rec_pest(i)%typ)
+-           case (1) !! daily
+-            allocate (rec_pest(i)%hd_pest(366,nbyr))
+-            
+-           case (2) !! monthly
+-            allocate (rec_pest(i)%hd_pest(12,nbyr))
+-            
+-           case (3) !! annual
+-            allocate (rec_pest(i)%hd_pest(1,nbyr))
+-        end select
+-           
+-        ! read and store entire year
+-       do 
+-         read (108,*,iostat=eof) iyr, istep
+-         if (eof < 0) exit
+-         if (iyr == time%yrc) exit
+-       end do
+-       
+-       backspace (108)
+-       iyr_prev = iyr
+-       iyrs = 1
+-       
+-       do 
+-         read (108,*,iostat=eof) iyr, istep, recall(i)%hd(istep,iyrs)
+-         if (eof < 0) exit
+-         !call hyd_convert_mass (recall(i)%hd(istep,iyrs))
+-         if (iyr /= iyr_prev) then
+-           iyr_prev = iyr
+-           iyrs = iyrs + 1
+-         endif
+-       end do
+-       close (108)
+-         end do 
+-        end do
+-        close (107)
+-      end do
+-      end if     
+-      
+       return
+       end subroutine recall_read
+\ No newline at end of file
+diff --git "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/recall_read_cs.f90" "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/recall_read_cs.f90"
+index ee8e515..702f56e 100644
+--- "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/recall_read_cs.f90"	
++++ "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/recall_read_cs.f90"	
+@@ -40,7 +40,7 @@
+ 
+       !read all recall files
+       inquire (file="cs_recall.rec", exist=i_exist)
+-      if (i_exist .or. in_rec%recall_rec /= "null") then
++      if (i_exist) then
+       do
+         open (107,file="cs_recall.rec")
+         read (107,*,iostat=eof) titldum
+diff --git "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/recall_read_pest.f90" "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/recall_read_pest.f90"
+new file mode 100644
+index 0000000..50fa34a
+--- /dev/null
++++ "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/recall_read_pest.f90"	
+@@ -0,0 +1,150 @@
++      !read point source data for constituents !rtb cs
++      subroutine recall_read_pest
++
++      use hydrograph_module
++      use input_file_module
++      use organic_mineral_mass_module
++      use constituent_mass_module
++      use maximum_data_module
++      use time_module
++      use exco_module
++      
++      implicit none      
++ 
++      character (len=80) :: titldum   !           |title of file
++      character (len=80) :: header    !           |header of file
++      character(len=16) :: ob_name
++      character(len=8) :: ob_typ
++      character(len=16) :: pest_name
++	  character(len=16) :: pest_cur
++	  real :: pest_mass
++      integer :: imax                 !none       |end of loop
++      integer :: iyr                  !           |
++      integer :: jday                 !           |
++      integer :: mo                   !           |
++      integer :: day_mo               !           |
++      integer :: eof                  !           |end of file
++      logical :: i_exist              !none       |check to determine if file exists
++      integer :: nbyr                 !none       !number of years the land use occurred 
++      integer :: k                    !           |
++      integer :: iyrs                 !           | 
++      integer :: iyr_prev             !none       |previous year
++      integer :: iyr_beg              !           |
++	  integer :: istep                !           | 
++      integer :: ipc                  !none       |counter
++      integer :: ii                   !none       |counter
++      integer :: i                    !           |
++      integer :: iexco_om
++      integer :: ifirst               !           |
++      integer :: iexo_allo = 0
++      integer :: ics,jj,kk,pr,pc,ipest
++      
++      eof = 0
++      imax = 0
++      
++	  !read all rec_pest files
++	  inquire (file="pest_recall.rec", exist=i_exist)
++	  if (i_exist ) then
++      do
++	  open (107,file="pest_recall.rec")
++	  read (107,*,iostat=eof) titldum
++	  if (eof < 0) exit
++	  read (107,*,iostat=eof) header
++	  if (eof < 0) exit
++	  imax = 0
++	  do while (eof == 0)
++	  read (107,*,iostat=eof) i
++	  if (eof < 0) exit
++	  imax = Max(imax,i) 
++      end do
++      end do
++	  
++	  if (imax > 0) then
++	  allocate (rec_pest(0:imax))
++	  !point sources originating from outside the watershed
++        if (.not. allocated(recoutcsb_d)) allocate (recoutcsb_d(imax))
++        if (.not. allocated(recoutcsb_m)) allocate (recoutcsb_m(imax))
++        if (.not. allocated(recoutcsb_y)) allocate (recoutcsb_y(imax))
++        if (.not. allocated(recoutcsb_a)) allocate (recoutcsb_a(imax))
++        do ii=1,imax
++          allocate (recoutcsb_d(ii)%pest(cs_db%num_pests))
++          allocate (recoutcsb_m(ii)%pest(cs_db%num_pests))
++          allocate (recoutcsb_y(ii)%pest(cs_db%num_pests))
++          allocate (recoutcsb_a(ii)%pest(cs_db%num_pests))
++          do ipest=1,cs_db%num_pests
++            recoutcsb_d(ii)%pest(ipest) = 0.
++            recoutcsb_m(ii)%pest(ipest) = 0.
++            recoutcsb_y(ii)%pest(ipest) = 0.
++            recoutcsb_a(ii)%pest(ipest) = 0.
++          enddo
++        enddo
++	  
++	  rewind (107)
++	  read (107,*,iostat=eof) titldum
++	  read (107,*,iostat=eof) header
++	  do ii = 1, imax
++		  read (107,*,iostat = eof) k, rec_pest(ii)%name, rec_pest(ii)%typ, rec_pest(ii)%filename
++		  open (108,file = rec_pest(ii)%filename)
++		  read (108,*,iostat=eof) titldum
++		  read (108,*,iostat=eof) nbyr
++		  read (108,*,iostat=eof) header
++		  
++	  select case (rec_pest(ii)%typ)
++		  case (1) !! daily
++		  allocate (rec_pest(ii)%hd_pest(366,nbyr))
++		  do pr = 1, 366
++		    do pc = 1, nbyr
++			  allocate (rec_pest(ii)%hd_pest(pr,pc)%pest(cs_db%num_pests))
++			  rec_pest(ii)%hd_pest(pr,pc)%pest = 0.
++			end do
++		  end do
++		  
++		  case (2) !! monthly
++		  allocate (rec_pest(ii)%hd_pest(12,nbyr))
++		  do pr = 1, 12
++		    do pc = 1, nbyr
++			  allocate (rec_pest(ii)%hd_pest(pr,pc)%pest(cs_db%num_pests))
++			  rec_pest(ii)%hd_pest(pr,pc)%pest = 0.
++			end do
++		  end do
++		  
++		  case (3) !! annual
++		  allocate (rec_pest(ii)%hd_pest(1,nbyr))
++		  do pr = 1, 1
++		    do pc = 1, nbyr
++			  allocate (rec_pest(ii)%hd_pest(pr,pc)%pest(cs_db%num_pests))
++			  rec_pest(ii)%hd_pest(pr,pc)%pest = 0.
++			end do
++		  end do
++	  end select
++	  
++	  read (108,*,iostat=eof) jday, mo, day_mo, iyr, ob_typ, ob_name, pest_name, pest_mass
++	  iyr_beg = iyr
++	  backspace (108)
++	  
++	  iyrs = 1
++	  pest_cur = "xyz"
++	  do
++	    if (eof < 0) exit
++		read (108,*,iostat=eof) jday, mo, day_mo, iyr, ob_typ, ob_name, pest_name, pest_mass
++		if(trim(pest_name) /= trim(pest_cur)) then
++		  do kk = 1, cs_db%num_pests
++		    if (trim(cs_db%pests(kk)) == trim(pest_name)) then
++			  ipest = cs_db%pest_num(kk)
++			  pest_cur = cs_db%pests(kk)
++			end if
++		  end do
++		end if
++		
++		iyrs = iyr - iyr_beg + 1		
++		rec_pest(k)%hd_pest(jday,iyrs)%pest(ipest) = pest_mass
++	  end do
++	  
++	  close (108)
++	  end do 
++	  close (107)
++	  end if    
++	  end if
++	  
++      return
++      end subroutine recall_read_pest
+\ No newline at end of file
+diff --git "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/recall_read_salt.f90" "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/recall_read_salt.f90"
+index cdbaf39..4380065 100644
+--- "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/recall_read_salt.f90"	
++++ "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/recall_read_salt.f90"	
+@@ -39,7 +39,7 @@
+ 
+       !read all recall files
+       inquire (file="salt_recall.rec", exist=i_exist)
+-      if (i_exist .or. "salt_recall.rec" /= "null") then
++      if (i_exist) then
+       do
+         open (107,file="salt_recall.rec")
+         read (107,*,iostat=eof) titldum
+diff --git "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/res_rel_ctbl.f90" "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/res_rel_conds.f90"
+similarity index 100%
+rename from "C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/res_rel_ctbl.f90"
+rename to "C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/res_rel_conds.f90"
+diff --git "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/salt_aquifer.f90" "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/salt_aquifer_module.f90"
+similarity index 99%
+rename from "C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/salt_aquifer.f90"
+rename to "C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/salt_aquifer_module.f90"
+index 9ec0cab..d0a1f05 100644
+--- "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/salt_aquifer.f90"	
++++ "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/salt_aquifer_module.f90"	
+@@ -1,4 +1,4 @@
+-      module salt_aquifer
++      module salt_aquifer_module
+ 
+       implicit none
+     
+diff --git "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/salt_balance.f90" "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/salt_balance.f90"
+index 9f220f5..7722423 100644
+--- "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/salt_balance.f90"	
++++ "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/salt_balance.f90"	
+@@ -12,7 +12,7 @@
+       use soil_module
+       use time_module
+       use salt_module
+-      use salt_aquifer
++      use salt_aquifer_module
+       use constituent_mass_module
+       use res_salt_module, only : wetsalt_d,ressalt_d
+       use ch_salt_module, only : chsalt_d
+diff --git "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/salt_chem_aqu.f90" "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/salt_chem_aqu.f90"
+index ee1b0c7..76ccfc1 100644
+--- "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/salt_chem_aqu.f90"	
++++ "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/salt_chem_aqu.f90"	
+@@ -27,7 +27,7 @@
+       use salt_data_module
+       use hydrograph_module, only : ob,icmd
+       use salt_module
+-      use salt_aquifer
++      use salt_aquifer_module
+       
+       implicit none
+ 
+diff --git "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/salt_irrig.f90" "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/salt_irrig.f90"
+index 7cc6699..ee0023f 100644
+--- "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/salt_irrig.f90"	
++++ "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/salt_irrig.f90"	
+@@ -11,7 +11,7 @@
+       use hydrograph_module, only : irrig,res,sp_ob1,ob
+       use hru_module, only : hru
+       use salt_module !rtb salt
+-      use salt_aquifer !rtb salt
++      use salt_aquifer_module !rtb salt
+       use ch_salt_module !rtb salt
+       use res_salt_module !rtb salt
+       use basin_module, only : bsn_cc
+diff --git "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/sd_channel_control.f90" "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/sd_channel_control.f90"
+index 88d0a7b..c9c1f76 100644
+--- "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/sd_channel_control.f90"	
++++ "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/sd_channel_control.f90"	
+@@ -225,7 +225,7 @@
+             if(bsn_cc%gwflow.eq.1) then
+               flood_freq(ich) = 1 !flag to indicate the water is in the floodplain
+               call gwflow_fpln(ich)
+-						endif
++            endif
+             
+             sd_ch(ich)%overbank = "ob"
+             rcharea = sd_ch_vel(ich)%area
+@@ -406,7 +406,7 @@
+         !! Peters latest channel erosion model
+         !!vel = 1.37 * (sd_ch(ich)%chs ** 0.31) * (12. * sd_ch(ich)%chw) ** 0.32      !annual ave for SWIFT
+         !! mean daily to peak ratio developed from GARDAY - THE STUDY OF MOST PROBABLE MEAN DAILY BANKFULL RUNOFF VOLUMES 
+-        !! IN SMALL WATERSHEDS DOMINATED BY CONVECTIVE/FRONTAL CHANNEL FORMING EVENTS AND THE CO-INCIDENT INNER BERM CHANNELS – PART I. 
++        !! IN SMALL WATERSHEDS DOMINATED BY CONVECTIVE/FRONTAL CHANNEL FORMING EVENTS AND THE CO-INCIDENT INNER BERM CHANNELS PART I.
+         !! Another eq from Peter - Qmax=Qmean*(1+2.66*Drainage Area^-.3)
+         pk_rto = 0.2 + 0.5 / 250. * ob(icmd)%area_ha
+         pk_rto = amin1 (1., pk_rto)
+@@ -490,7 +490,7 @@
+       end if
+       
+       !! compute sediment leaving the channel - washload only
+-	  sedout = ht1%sed - dep + hc_sed + ebank_t     !  + ebtm_t
++      sedout = ht1%sed - dep + hc_sed + ebank_t     !  + ebtm_t
+       
+       !! set values for outflow hydrograph
+       !! calculate flow velocity and travel time  ht2 = ht1   !***jga 
+@@ -543,10 +543,10 @@
+         ht2%solp = ht2%solp + ebank_t * sd_ch(ich)%p_bio
+         
+         !! route constituents
+-        call ch_rtpest
++        !call ch_rtpest
+         !! call mike winchell's new routine for pesticide routing
+         ! call ch_rtpest2
+-        call ch_rtpath
++        !call ch_rtpath
+       end if
+       
+       end if    ! peakrate > 0
+@@ -554,7 +554,7 @@
+       flo_ls = ht2%flo
+       !! compute water balance - precip, evap and seep
+       !! km * m * 1000 m/km * ha/10000 m2 = ha
+-      ch_wat_d(ich)%area_ha = sd_ch(ich)%chl * sd_ch(ich)%chw / 10.
++      ch_wat_d(ich)%area_ha = sd_ch(ich)%chl * (sd_ch(ich)%chw + 2. * sd_ch(ich)%chd * sd_ch(ich)%chss) / 10.
+       !! m3 = 10. * mm * ha
+       ch_wat_d(ich)%precip = 10. * wst(iwst)%weat%precip * ch_wat_d(ich)%area_ha
+       ch_wat_d(ich)%evap = 10. * bsn_prm%evrch * wst(iwst)%weat%pet * ch_wat_d(ich)%area_ha
+@@ -654,6 +654,12 @@
+         hcs3 = hcs2 + ch_water(ich) !incoming + storage
+       endif
+       
++      !! route constituents
++        call ch_rtpest
++        !! call mike winchell's new routine for pesticide routing
++        ! call ch_rtpest2
++        call ch_rtpath
++      
+       !rtb hydrograph separation
+       if (rttime > det) then      ! ht1 = incoming + storage
+         !! travel time > timestep -- then all incoming is stored and frac of stored is routed
+@@ -837,4 +843,4 @@
+ 
+       return
+       
+-      end subroutine sd_channel_control
+\ No newline at end of file
++      end subroutine sd_channel_control
+diff --git "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/sd_hydsed_init.f90" "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/sd_hydsed_init.f90"
+index d68e7f0..8300a51 100644
+--- "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/sd_hydsed_init.f90"	
++++ "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/sd_hydsed_init.f90"	
+@@ -127,14 +127,8 @@
+         d = 0.
+         chside = sd_ch(i)%chss
+         fps = 4.
+-        b = sd_ch(i)%chw - 2. * sd_ch(i)%chd * chside
+-
+-        !! check IF bottom width (b) is < 0
+-        if (b <= 0.) then
+-            b = .5 * sd_ch(i)%chw
+-            b = Max(0., b)
+-            chside = (sd_ch(i)%chw - b) / (2. * sd_ch(i)%chd)
+-        end if
++        b = sd_ch(i)%chw
++		
+         sd_ch_vel(i)%wid_btm = b
+         sd_ch_vel(i)%dep_bf = sd_ch(i)%chd  !delete sd_ch_vel when finished
+         !! compute travel time coefficients - delete when finished with flood plain
+diff --git "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/sd_rating_curve.f90" "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/sd_rating_curve.f90"
+index 8016f63..f1ea4fc 100644
+--- "a/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\SWAT+\\Rev_61_0_1_repository\\source_codes/sd_rating_curve.f90"	
++++ "b/C:\\Users\\FuchsMD\\OneDrive - BASF\\PhD\\dev\\swatplus\\src/sd_rating_curve.f90"	
+@@ -23,13 +23,7 @@
+       real :: vel                   !               |
+       real :: frac_abov
+ 
+-      b = sd_ch(i)%chw - 2. * sd_ch(i)%chd * sd_ch(i)%chss
+-      !! check if bottom width (b) is < 0
+-      if (b <= 0.) then
+-        b = .5 * sd_ch(i)%chw
+-        b = Max(0., b)
+-        sd_ch(i)%chss = (sd_ch(i)%chw - b) / (2. * sd_ch(i)%chd)
+-      end if
++      b = sd_ch(i)%chw
+       
+       !! compute rating curve at 0.1 and 1.0 times bankfull depth
+       do i_dep = 1, 2
+@@ -76,7 +70,7 @@
+         ch_rcurv(i)%elev(ifp_dep)%dep = (1. + frac_abov) * sd_ch(i)%chd
+         ch_rcurv(i)%elev(ifp_dep)%wet_perim = p
+         ch_rcurv(i)%elev(ifp_dep)%xsec_area = a
+-        ch_rcurv(i)%elev(ifp_dep)%top_wid = sd_ch(i)%chw + 2. * dep / sd_ch(i)%fps
++        ch_rcurv(i)%elev(ifp_dep)%top_wid = ch_rcurv(i)%elev(2)%top_wid + 2. * dep / sd_ch(i)%fps
+         ch_rcurv(i)%elev(ifp_dep)%surf_area = ch_rcurv(i)%elev(ifp_dep)%top_wid * sd_ch(i)%chl
+         ch_rcurv(i)%elev(ifp_dep)%vol_ch = vol_bf
+         ch_rcurv(i)%elev(ifp_dep)%vol_fp = ch_rcurv(i)%elev(ifp_dep)%top_wid * dep * sd_ch(i)%chl * 1000.
